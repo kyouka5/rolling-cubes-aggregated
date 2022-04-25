@@ -9,7 +9,6 @@ import javafx.beans.property.SimpleLongProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.util.Duration;
-
 import org.apache.commons.lang3.time.DurationFormatUtils;
 
 /**

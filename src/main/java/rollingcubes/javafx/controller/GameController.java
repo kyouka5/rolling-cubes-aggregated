@@ -1,10 +1,5 @@
 package rollingcubes.javafx.controller;
 
-import java.io.IOException;
-import java.time.Duration;
-import java.time.Instant;
-import java.util.List;
-
 import javafx.animation.Animation;
 import javafx.application.Platform;
 import javafx.beans.binding.ObjectBinding;
@@ -22,16 +17,18 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
-
-import javax.inject.Inject;
-
 import org.tinylog.Logger;
-
 import rollingcubes.results.GameResult;
-import rollingcubes.results.GameResultDao;
+import rollingcubes.results.GameResultRepository;
 import rollingcubes.state.RollingCubesState;
 import util.javafx.ControllerHelper;
 import util.javafx.Stopwatch;
+
+import javax.inject.Inject;
+import java.io.IOException;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.List;
 
 public class GameController {
 
@@ -57,7 +54,7 @@ public class GameController {
     private FXMLLoader fxmlLoader;
 
     @Inject
-    private GameResultDao gameResultDao;
+    private GameResultRepository gameResultRepository;
 
     private RollingCubesState gameState;
 
@@ -162,7 +159,7 @@ public class GameController {
             Logger.info("The game has been given up");
         }
         Logger.debug("Saving result");
-        gameResultDao.persist(createGameResult());
+        gameResultRepository.addOne(createGameResult());
         Stage stage = (Stage) ((Node) actionEvent.getSource()).getScene().getWindow();
         ControllerHelper.loadAndShowFXML(fxmlLoader, "/fxml/highscores.fxml", stage);
     }

@@ -10,10 +10,10 @@ public enum Direction {
     DOWN(1, 0),
     LEFT(0, -1);
 
-    private int dx;
-    private int dy;
+    private final int dx;
+    private final int dy;
 
-    private Direction(int dx, int dy) {
+    Direction(int dx, int dy) {
         this.dx = dx;
         this.dy = dy;
     }

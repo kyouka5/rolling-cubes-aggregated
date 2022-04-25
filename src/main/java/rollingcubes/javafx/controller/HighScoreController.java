@@ -1,12 +1,5 @@
 package rollingcubes.javafx.controller;
 
-import java.io.IOException;
-import java.time.Duration;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.format.FormatStyle;
-import java.util.List;
-
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -19,16 +12,20 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
+import org.apache.commons.lang3.time.DurationFormatUtils;
+import org.tinylog.Logger;
+import rollingcubes.results.GameResult;
+import rollingcubes.results.GameResultRepository;
+import util.javafx.ControllerHelper;
+import util.javafx.FileChooserHelper;
 
 import javax.inject.Inject;
-
-import org.apache.commons.lang3.time.DurationFormatUtils;
-
-import org.tinylog.Logger;
-
-import rollingcubes.results.GameResult;
-import rollingcubes.results.GameResultDao;
-import util.javafx.ControllerHelper;
+import java.io.IOException;
+import java.time.Duration;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
+import java.util.List;
 
 public class HighScoreController {
 
@@ -36,7 +33,7 @@ public class HighScoreController {
     private FXMLLoader fxmlLoader;
 
     @Inject
-    private GameResultDao gameResultDao;
+    private GameResultRepository gameResultRepository;
 
     @FXML
     private TableView<GameResult> highScoreTable;
@@ -56,42 +53,38 @@ public class HighScoreController {
     @FXML
     private void initialize() {
         Logger.debug("Loading high scores...");
-        List<GameResult> highScoreList = gameResultDao.findBest(10);
+
+        List<GameResult> highScoreList = gameResultRepository.findBest(10);
 
         player.setCellValueFactory(new PropertyValueFactory<>("player"));
         steps.setCellValueFactory(new PropertyValueFactory<>("steps"));
         duration.setCellValueFactory(new PropertyValueFactory<>("duration"));
         created.setCellValueFactory(new PropertyValueFactory<>("created"));
 
-        duration.setCellFactory(column -> {
-            TableCell<GameResult, Duration> cell = new TableCell<GameResult, Duration>() {
-                @Override
-                protected void updateItem(Duration item, boolean empty) {
-                    super.updateItem(item, empty);
-                    if(empty) {
-                        setText(null);
-                    } else {
-                        setText(DurationFormatUtils.formatDuration(item.toMillis(),"H:mm:ss"));
-                    }
+        duration.setCellFactory(column -> new TableCell<>() {
+            @Override
+            protected void updateItem(Duration item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty) {
+                    setText(null);
+                } else {
+                    setText(DurationFormatUtils.formatDuration(item.toMillis(), "H:mm:ss"));
                 }
-            };
-            return cell;
+            }
         });
 
-        created.setCellFactory(column -> {
-            TableCell<GameResult, ZonedDateTime> cell = new TableCell<GameResult, ZonedDateTime>() {
-                private DateTimeFormatter formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.LONG);
-                @Override
-                protected void updateItem(ZonedDateTime item, boolean empty) {
-                    super.updateItem(item, empty);
-                    if(empty) {
-                        setText(null);
-                    } else {
-                        setText(item.format(formatter));
-                    }
+        created.setCellFactory(column -> new TableCell<>() {
+            private final DateTimeFormatter formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.LONG);
+
+            @Override
+            protected void updateItem(ZonedDateTime item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty) {
+                    setText(null);
+                } else {
+                    setText(item.format(formatter));
                 }
-            };
-            return cell;
+            }
         });
 
         ObservableList<GameResult> observableResult = FXCollections.observableArrayList();
@@ -101,9 +94,22 @@ public class HighScoreController {
     }
 
     public void handleRestartButton(ActionEvent actionEvent) throws IOException {
-        Logger.debug("{} is pressed", ((Button) actionEvent.getSource()).getText());
         Stage stage = (Stage) ((Node) actionEvent.getSource()).getScene().getWindow();
+        Logger.debug("{} is pressed", ((Button) actionEvent.getSource()).getText());
         ControllerHelper.loadAndShowFXML(fxmlLoader, "/fxml/opening.fxml", stage);
     }
 
+    public void handleSaveScoreboard(ActionEvent actionEvent) throws IOException {
+        Stage stage = (Stage) ((Node) actionEvent.getSource()).getScene().getWindow();
+        FileChooserHelper.show(false, stage)
+                .ifPresent(file -> {
+                    try {
+                        gameResultRepository.saveToFile(file);
+                    } catch (IOException ex) {
+                        Logger.error(ex.getMessage());
+                    }
+                });
+
+        Logger.debug("{} is pressed", ((Button) actionEvent.getSource()).getText());
+    }
 }

@@ -2,8 +2,10 @@ package rollingcubes.state;
 
 import javafx.beans.Observable;
 import javafx.beans.binding.BooleanBinding;
-import javafx.beans.property.*;
-
+import javafx.beans.property.ReadOnlyBooleanProperty;
+import javafx.beans.property.ReadOnlyBooleanWrapper;
+import javafx.beans.property.ReadOnlyObjectProperty;
+import javafx.beans.property.ReadOnlyObjectWrapper;
 import org.tinylog.Logger;
 
 import java.util.Arrays;
@@ -239,7 +241,7 @@ public class RollingCubesState {
 
     public static void main(String[] args) {
         var state = new RollingCubesState();
-        System.out.println(state);
+        Logger.debug(state);
     }
 
 }
