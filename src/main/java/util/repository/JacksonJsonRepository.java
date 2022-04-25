@@ -13,11 +13,11 @@ public abstract class JacksonJsonRepository {
     protected static final ObjectMapper MAPPER = new ObjectMapper().registerModule(new JavaTimeModule());
 
     /**
-     * Deserializes a list of objects from JSON.
+     * Deserializes a set of objects from JSON.
      *
      * @param in           the input stream from which JSON data will be read
      * @param elementClass represents the class of the elements
-     * @return the list of objects deserialized from JSON
+     * @return the set of objects deserialized from JSON
      * @throws IOException if any I/O error occurs
      */
     protected static <T> Set<T> readSet(InputStream in, Class<T> elementClass) throws IOException {
@@ -25,6 +25,12 @@ public abstract class JacksonJsonRepository {
         return MAPPER.readValue(in, type);
     }
 
+    /**
+     * Serializes a set of objects to JSON.
+     * @param os the output stream to which JSON data will be written
+     * @param value represents the class of the elements
+     * @throws IOException if any I/O error occurs
+     */
     protected static <T> void writeSet(OutputStream os, Set<T> value) throws IOException {
         MAPPER.writeValue(os, value);
     }
